@@ -64,3 +64,9 @@ swiftmailer:
     username: '%mailer_user%'
     password: '%mailer_password%'
     spool: { type: memory }
+
+# Web Socket Configuration
+gos_web_socket:
+    server:
+        port: 9090        #The port the socket server will listen on
+        host: 0.0.0.0   #The host ip to bind to
