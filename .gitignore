@@ -10,3 +10,5 @@
 /bin/
 /composer.phar
 /.sass-cache
+
+node_modules
