@@ -1,24 +1,45 @@
 define([
-    'jquery',
-    'underscore',
-    'backbone',
-    'twig',
-    'text!templates/app/notification/notification.html.twig',
-    'app/base'
-], function($, _, Backbone, Twig, template, App) {
+  "jquery",
+  "underscore",
+  "backbone",
+  "twig",
+  "text!templates/app/notification/notification.html.twig",
+  "app/base",
+  "app/socket"
+], function($, _, Backbone, Twig, template, App, Socket) {
+  App.Views.Notification = Backbone.View.extend({
+    template: Twig.twig({ data: template }),
 
-    App.Views.Notification = Backbone.View.extend({
-        template: Twig.twig({ data: template }),
+    initialize: function() {
+      Socket.getSession((err, session) => {
+        this.session = session;
+      });
+      this.render();
+    },
 
-        initialize: function() {
-            this.render();
+    events: {
+      click: "onClick"
+    },
+
+    onClick: function(a, b, c) {
+      //using "then" promises.
+      this.session.call("notification/add_func", { term1: 2, term2: 5 }).then(
+        function(result) {
+          console.log("RPC Valid!", result);
         },
-
-        render: function() {
-            var data = this.model.toJSON();
-            this.$el.html($.trim(this.template.render(data)));
+        function(error, desc) {
+          console.log("RPC Error", error, desc);
         }
-    });
+      );
+      debugger;
+    },
 
-    return App;
+    render: function() {
+      var data = this.model.toJSON();
+      this.$el.html($.trim(this.template.render(data)));
+      return this;
+    }
+  });
+
+  return App;
 });

@@ -1,5 +1,0 @@
-services:
-    acme_hello.topic_sample_service:
-        class: AppBundle\Topic\NotificationTopic
-        tags:
-            - { name: gos_web_socket.topic }

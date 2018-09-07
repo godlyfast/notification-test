@@ -1,0 +1,11 @@
+notification_topic:
+    channel: notification/channel
+    handler:
+        callback: 'notification.topic' #related to the getName() of your topic
+notification_rpc:
+    channel: notification/{method}
+    handler:
+        callback: 'notification.rpc' #related to the getName() or your RPC service
+    requirements:
+        method:
+            pattern: "[a-z_]+" #accept all valid regex, don't put delimiters !

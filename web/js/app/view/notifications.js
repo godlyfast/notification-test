@@ -1,52 +1,56 @@
-var webSocket = WS.connect("ws://" + window.location.hostname + ":9090");
-
-webSocket.on("socket/connect", function(session) {
-  //session is an Autobahn JS WAMP session.
-  // session.subscribe("notification/channel", function(uri, payload) {
-  // console.log("Received message", payload.msg);
-  // });
-
-  console.log("Successfully Connected!");
-  // setInterval(() => {
-  session.publish("notification/channel", {
-    msg: "This is a message!"
-  });
-  // }, 1000);
-});
-
-webSocket.on("socket/disconnect", function(error) {
-  console.log(error);
-  //error provides us with some insight into the disconnection: error.reason and error.code
-
-  console.log("Disconnected for " + error.reason + " with code " + error.code);
-});
-
 define([
   "jquery",
   "underscore",
   "backbone",
   "app/collection/notifications",
-  "app/view/notification"
-], function($, _, Backbone, App) {
+  "app/view/notification",
+  "app/socket"
+], function($, _, Backbone, App, Notification, Socket) {
   App.Views.Notifications = Backbone.View.extend({
     initialize: function(options) {
       this.notifications = new App.Collections.Notifications({
-        mode: "view"
+        mode: "view",
+        sortBy: function(a, b) {
+          debugger;
+        }
       });
-      this.notifications.bind("change reset add remove", this.render, this);
-      this.notifications.fetch();
+      this.notifications.bind("change reset", this.render, this);
+      this.notifications.bind("add", this.renderAdd, this);
+      this.notifications.fetch({ reset: true });
 
-      // this.render();
+      Socket.getSession(
+        function(err, session) {
+          session.subscribe(
+            "notification/channel",
+            function(uri, payload) {
+              console.log(uri, payload);
+              switch (payload.msg) {
+                case "notification_created":
+                  this.notifications.add(payload.notification);
+                  break;
+                default:
+              }
+            }.bind(this)
+          );
+        }.bind(this)
+      );
     },
 
     events: {
-      change: "render"
+      // change: "render"
+    },
+
+    renderAdd: function(model, collection, c, d) {
+      var notificationView = new App.Views.Notification({
+        model: model
+      });
+      this.$el.prepend(notificationView.$el);
+      return this;
     },
 
     render: function() {
       console.log("RENDER", this.notifications);
       this.$el.html("");
-      var component = this;
       this.notifications.each(
         function(notification) {
           var notificationView = new App.Views.Notification({

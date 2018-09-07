@@ -4,6 +4,14 @@ parameters:
     #parameter_name: value
 
 services:
+    app_bundle.notification_topic_service:
+        class: AppBundle\Topic\NotificationTopic
+        tags:
+            - { name: gos_web_socket.topic }
+    app_bundle.rpc_notification_service:
+        class: AppBundle\RPC\NotificationService
+        tags:
+            - { name: gos_web_socket.rpc }
     #service_name:
     #    class: AppBundle\Directory\ClassName
     #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']

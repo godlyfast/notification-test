@@ -67,12 +67,23 @@ swiftmailer:
 
 # Web Socket Configuration
 gos_web_socket:
+    pushers:
+        amqp:
+            host: rabbitmq
+            port: 5672
+            login: guest
+            password: guest
+            vhost: '/'
+    topics:
+      - @app_bundle.notification_topic_service
+    rpc:
+      - @app_bundle.rpc_notification_service  
     server:
         port: 9090        #The port the socket server will listen on
         host: 0.0.0.0   #The host ip to bind to
         router:
           resources:
-            - pubsub/routing.yml
+            - @AppBundle/Resources/config/pubsub/routing.yml
 
 # Assetic
 assetic:

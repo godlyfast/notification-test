@@ -1,4 +1,0 @@
-notification_topic:
-    channel: notification/channel
-    handler:
-        callback: 'notification.topic' #related to the getName() of your topic

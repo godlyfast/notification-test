@@ -3,11 +3,12 @@
 namespace AppBundle\Topic;
 
 use Gos\Bundle\WebSocketBundle\Topic\TopicInterface;
+use Gos\Bundle\WebSocketBundle\Topic\PushableTopicInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Wamp\Topic;
 use Gos\Bundle\WebSocketBundle\Router\WampRequest;
 
-class NotificationTopic implements TopicInterface
+class NotificationTopic implements TopicInterface, PushableTopicInterface
 {
     /**
      * This will receive any Subscription requests for this topic.
@@ -20,7 +21,6 @@ class NotificationTopic implements TopicInterface
     public function onSubscribe(ConnectionInterface $connection, Topic $topic, WampRequest $request)
     {
         //this will broadcast the message to ALL subscribers of this topic.
-        dump('sdfjkhsdfkjh');
         $topic->broadcast(['msg' => $connection->resourceId . " has joined " . $topic->getId()]);
     }
 
@@ -51,13 +51,6 @@ class NotificationTopic implements TopicInterface
      */
     public function onPublish(ConnectionInterface $connection, Topic $topic, WampRequest $request, $event, array $exclude, array $eligible)
     {
-        /*
-            $topic->getId() will contain the FULL requested uri, so you can proceed based on that
-
-            if ($topic->getId() == "notification/channel/shout")
-               //shout something to all subs.
-        */
-
         $topic->broadcast([
             'msg' => $event
         ]);
@@ -69,7 +62,17 @@ class NotificationTopic implements TopicInterface
      */
     public function getName()
     {
-      dump('sdkjfhskdfjhkjh');
         return 'notification.topic';
+    }
+
+    /**
+     * @param Topic        $topic
+     * @param WampRequest  $request
+     * @param array|string $data
+     * @param string       $provider The name of pusher who push the data
+     */
+    public function onPush(Topic $topic, WampRequest $request, $data, $provider)
+    {
+        $topic->broadcast($data);
     }
 }

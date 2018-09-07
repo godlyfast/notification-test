@@ -9,6 +9,8 @@ FROM php:${PHP_VERSION}-alpine
 
 LABEL maintainer="Mahmoud Zalt <mahmoud@zalt.me>"
 
+RUN printf "\n%s\n%s" "@edge http://dl-cdn.alpinelinux.org/alpine/edge/main" "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
 RUN apk --update add wget \
   curl \
   git \
@@ -19,10 +21,12 @@ RUN apk --update add wget \
   zlib-dev \
   autoconf \
   cyrus-sasl-dev \
-  libgsasl-dev
+  libgsasl-dev \
+  rabbitmq-c@testing \
+  rabbitmq-c-dev@testing
 
 RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer xml pcntl
-RUN pecl channel-update pecl.php.net && pecl install memcached mcrypt-1.0.1 && docker-php-ext-enable memcached
+RUN pecl channel-update pecl.php.net && pecl install memcached mcrypt-1.0.1 amqp && docker-php-ext-enable memcached amqp
 
 #Install BCMath package:
 ARG INSTALL_BCMATH=false

@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Ratchet\Wamp\Topic;
 
 use AppBundle\Entity\Notification;
 
@@ -26,10 +25,7 @@ class NotificationController extends Controller
      */
     protected $session;
 
-    /**
-     * @var \AppBundle\Topic\NotificationTopic
-     */
-    protected $topic;
+    protected $pusher;
 
     /**
      * @var \Symfony\Component\Serializer\Serializer
@@ -41,7 +37,7 @@ class NotificationController extends Controller
         $this->session = $this->get('session');
         $this->session->start();
 
-        $this->topic = $this->get('notification.topic');
+        $this->pusher = $this->get('gos_web_socket.amqp.pusher');
 
         $this->em = $this->getDoctrine()->getManager();
 
@@ -104,12 +100,17 @@ class NotificationController extends Controller
         $this->em->flush($notification);
 
         $notification = $this->serializer->normalize($notification);
-        /** @var ConnectionInterface $client **/
-        foreach ($this->topic as $client) {
-            //Do stuff ...
-            dump($client);
-            $client->publish('asd');
-        }
+        $pusher = $this->container->get('gos_web_socket.amqp.pusher');
+
+        // push(data, route_name, route_arguments, $context)
+        $this->pusher->push(
+          [
+            'notification' => $notification,
+            'msg' => 'notification_created'
+          ],
+          'notification_topic'
+        );
+
         return new JsonResponse($notification);
     }
 
@@ -137,6 +138,14 @@ class NotificationController extends Controller
 
         $this->em->persist($notification);
         $this->em->flush($notification);
+
+        $this->pusher->push(
+          [
+            'notification' => $notification,
+            'msg' => 'notification_edited'
+          ],
+          'notification_topic'
+        );
 
         $notification = $this->serializer->normalize($notification);
         return new JsonResponse($notification);
