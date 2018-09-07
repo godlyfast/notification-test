@@ -19,8 +19,7 @@ RUN apk --update add wget \
   zlib-dev \
   autoconf \
   cyrus-sasl-dev \
-  libgsasl-dev \
-  supervisor
+  libgsasl-dev
 
 RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer xml pcntl
 RUN pecl channel-update pecl.php.net && pecl install memcached mcrypt-1.0.1 && docker-php-ext-enable memcached
@@ -41,18 +40,7 @@ RUN if [ ${INSTALL_PGSQL} = true ]; then \
 RUN rm /var/cache/apk/* \
     && mkdir -p /var/www
 
-#
-#--------------------------------------------------------------------------
-# Optional Supervisord Configuration
-#--------------------------------------------------------------------------
-#
-# Modify the ./supervisor.conf file to match your App's requirements.
-# Make sure you rebuild your container with every change.
-#
-
-COPY supervisord.conf /etc/supervisord.conf
-
-ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c",  "/etc/supervisord.conf"]
+ENTRYPOINT ["/var/www/app/console",  "gos:websocket:server", "-vvv"]
 
 #
 #--------------------------------------------------------------------------
@@ -77,4 +65,4 @@ RUN php -v | head -n 1 | grep -q "PHP ${PHP_VERSION}."
 #--------------------------------------------------------------------------
 #
 
-WORKDIR /etc/supervisor/conf.d/
+WORKDIR /var/www

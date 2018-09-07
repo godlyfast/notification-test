@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Ratchet\Wamp\Topic;
 
 use AppBundle\Entity\Notification;
 
@@ -26,14 +27,21 @@ class NotificationController extends Controller
     protected $session;
 
     /**
+     * @var \AppBundle\Topic\NotificationTopic
+     */
+    protected $topic;
+
+    /**
      * @var \Symfony\Component\Serializer\Serializer
      */
     protected $serializer;
-    
+
     public function initialize()
     {
         $this->session = $this->get('session');
         $this->session->start();
+
+        $this->topic = $this->get('notification.topic');
 
         $this->em = $this->getDoctrine()->getManager();
 
@@ -84,7 +92,7 @@ class NotificationController extends Controller
 
         $content = $request->getContent();
         $content = json_decode($content, true);
-        
+
         $notification = new Notification();
         $notification->setTitle($content['title']);
         $notification->setMessage($content['message']);
@@ -96,6 +104,12 @@ class NotificationController extends Controller
         $this->em->flush($notification);
 
         $notification = $this->serializer->normalize($notification);
+        /** @var ConnectionInterface $client **/
+        foreach ($this->topic as $client) {
+            //Do stuff ...
+            dump($client);
+            $client->publish('asd');
+        }
         return new JsonResponse($notification);
     }
 
@@ -114,7 +128,7 @@ class NotificationController extends Controller
 
         $content = $request->getContent();
         $content = json_decode($content, true);
-        
+
         $notification->setTitle($content['title']);
         $notification->setMessage($content['message']);
         $notification->setValidTo(new \DateTime($content['validTo']));

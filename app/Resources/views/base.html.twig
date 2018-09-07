@@ -10,11 +10,11 @@
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
+        {{ ws_client() }}
         {% block body %}{% endblock %}
         {% block javascripts %}
             <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
             <script src="/js/requireConfig.js"></script>
         {% endblock %}
-        {{ ws_client() }}
     </body>
 </html>
