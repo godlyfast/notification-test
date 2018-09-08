@@ -5,10 +5,12 @@ parameters:
 
 services:
     app_bundle.notification_topic_service:
+        arguments: ['@doctrine.orm.entity_manager']
         class: AppBundle\Topic\NotificationTopic
         tags:
             - { name: gos_web_socket.topic }
     app_bundle.rpc_notification_service:
+        arguments: ['@doctrine.orm.entity_manager']
         class: AppBundle\RPC\NotificationService
         tags:
             - { name: gos_web_socket.rpc }

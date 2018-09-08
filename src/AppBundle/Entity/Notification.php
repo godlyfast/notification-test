@@ -12,6 +12,14 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Notification
 {
+
+    /**
+     * Many Notifications have Many Users.
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="notifications", cascade={"persist"})
+     * @ORM\JoinTable(name="users_notifications")
+     */
+    public $users;
+
     /**
      * @var integer $id
      *
@@ -24,10 +32,10 @@ class Notification
     /**
      * @var string $title
      *
-     * @ORM\Column(name="title", type="string", length=45) 
+     * @ORM\Column(name="title", type="string", length=45)
      */
     private $title;
-    
+
     /**
      * @var string $message
      *
@@ -61,6 +69,8 @@ class Notification
         $now = new \DateTime();
         $this->validFrom = $now;
         $this->validTo = clone $now;
+
+        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -78,7 +88,7 @@ class Notification
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -98,9 +108,9 @@ class Notification
     }
 
     /**
-     * Get title 
+     * Get title
      *
-     * @return string 
+     * @return string
      */
     public function getTitle()
     {
@@ -122,7 +132,7 @@ class Notification
     /**
      * Get message
      *
-     * @return string 
+     * @return string
      */
     public function getMessage()
     {
@@ -144,7 +154,7 @@ class Notification
     /**
      * Get validFrom
      *
-     * @return string 
+     * @return string
      */
     public function getValidFrom()
     {
@@ -166,7 +176,7 @@ class Notification
     /**
      * Get validTo
      *
-     * @return string 
+     * @return string
      */
     public function getValidTo()
     {
@@ -188,7 +198,7 @@ class Notification
     /**
      * Get active
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getActive()
     {

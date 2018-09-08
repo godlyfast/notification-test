@@ -1,7 +1,20 @@
 define(["jquery", "underscore", "backbone"], function($, _, Backbone) {
   "use strict";
 
+  var User;
+
+  var rand = function() {
+    return Math.random()
+      .toString(36)
+      .substr(2); // remove `0.`
+  };
+
+  var token = function() {
+    return rand() + rand(); // to make it longer
+  };
+
   var getSession = function(cb) {
+    if (!window.WS) return cb(new Error("No WS"));
     var webSocket = WS.connect("ws://" + window.location.hostname + ":9090");
 
     webSocket.on("socket/connect", function(session) {
@@ -15,7 +28,43 @@ define(["jquery", "underscore", "backbone"], function($, _, Backbone) {
     });
   };
 
+  var subscribe = function(topic, cb) {
+    getSession(function(err, session) {
+      if (err) return cb(err);
+      session.subscribe(topic, function(url, data) {
+        cb(null, url, data);
+      });
+    });
+  };
+
+  var publish = function() {};
+
+  var call = function(url, params, cb) {
+    getSession(function(err, session) {
+      if (err) return cb(err);
+      session.call(url, params).then(
+        function(data) {
+          cb(null, data);
+        },
+        function(err) {
+          cb(err);
+        }
+      );
+    });
+  };
+
+  function getUser(cb) {
+    if (User) return cb(null, User);
+    $.post("/ping", { token: "foo" }, function(resp) {
+      User = resp.user;
+      cb(null, User);
+    });
+  }
+
   return {
-    getSession: getSession
+    subscribe: subscribe,
+    publish: publish,
+    call: call,
+    getUser: getUser
   };
 });

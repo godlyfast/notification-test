@@ -10,8 +10,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-
+use Doctrine\ORM\Query\Expr\Join;
 use AppBundle\Entity\Notification;
+use AppBundle\Entity\User;
 
 class NotificationController extends Controller
 {
@@ -26,6 +27,7 @@ class NotificationController extends Controller
     protected $session;
 
     protected $pusher;
+    protected $user;
 
     /**
      * @var \Symfony\Component\Serializer\Serializer
@@ -41,6 +43,10 @@ class NotificationController extends Controller
 
         $this->em = $this->getDoctrine()->getManager();
 
+        $this->user = $this->em
+                ->getRepository('AppBundle:User')
+                ->findOneBy(['sessionId' => $this->session->getId()]);
+
         $encoders = array(new JsonEncoder());
         $normalizers = array(new ObjectNormalizer());
         $this->serializer = new Serializer($normalizers, $encoders);
@@ -54,11 +60,19 @@ class NotificationController extends Controller
     {
         $this->initialize();
 
-        $notifications = $this->em->getRepository('AppBundle:Notification')->createQueryBuilder('n')
-            ->where('n.active = true')
+        $qb = $this->em->getRepository('AppBundle:Notification')
+            ->createQueryBuilder('n');
+
+        $notifications = $qb
+            ->leftJoin('n.users', 'u', Join::WITH, 'u.sessionId = :sid')
+            ->andWhere('n.active = true')
             ->andWhere(':now BETWEEN n.validFrom AND n.validTo')
+            ->having('COUNT(u) = 0')
+            ->groupby('n')
+            ->setParameter('sid', $this->session->getId())
             ->setParameter('now', new \DateTime())
             ->getQuery()->getResult();
+
 
         $notifications = $this->serializer->normalize($notifications);
         return new JsonResponse($notifications);
@@ -100,7 +114,6 @@ class NotificationController extends Controller
         $this->em->flush($notification);
 
         $notification = $this->serializer->normalize($notification);
-        $pusher = $this->container->get('gos_web_socket.amqp.pusher');
 
         // push(data, route_name, route_arguments, $context)
         $this->pusher->push(
@@ -134,10 +147,21 @@ class NotificationController extends Controller
         $notification->setMessage($content['message']);
         $notification->setValidTo(new \DateTime($content['validTo']));
         $notification->setValidFrom(new \DateTime($content['validFrom']));
+
+        if(isset($content['seen'])) {
+          $user = $this->user;
+          if (!isset($user)) {
+              $user = new User();
+              $user->setSessionId($this->session->getId());
+          }
+          $notification->users[] = $user;
+        }
         $notification->setActive($content['active']);
 
         $this->em->persist($notification);
         $this->em->flush($notification);
+
+        $notification = $this->serializer->normalize($notification);
 
         $this->pusher->push(
           [
@@ -147,7 +171,6 @@ class NotificationController extends Controller
           'notification_topic'
         );
 
-        $notification = $this->serializer->normalize($notification);
         return new JsonResponse($notification);
     }
 }

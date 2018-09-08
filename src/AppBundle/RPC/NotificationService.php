@@ -6,8 +6,18 @@ use Ratchet\ConnectionInterface;
 use Gos\Bundle\WebSocketBundle\RPC\RpcInterface;
 use Gos\Bundle\WebSocketBundle\Router\WampRequest;
 
+use Doctrine\ORM\EntityManager;
+
 class NotificationService implements RpcInterface
 {
+    /**
+     * @var $em EntityManager
+     */
+    protected $em;
+
+    function __construct(EntityManager $em) {
+      $this->em = $em;
+    }
     /**
      * Adds the params together
      *
@@ -20,11 +30,16 @@ class NotificationService implements RpcInterface
      */
     public function addFunc(ConnectionInterface $connection, WampRequest $request, $params)
     {
-      dump($connection);
         return array(
           "result" => array_sum($params),
           "con" => json_encode($connection)
         );
+    }
+
+    public function makeSeen(ConnectionInterface $connection, WampRequest $request, $params)
+    {
+        $e = $this->em->getRepository('AppBundle:Notification')->findAll();
+        return ['e' => $e];
     }
 
     /**

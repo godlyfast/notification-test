@@ -11,9 +11,19 @@ define([
     template: Twig.twig({ data: template }),
 
     initialize: function() {
-      Socket.getSession((err, session) => {
-        this.session = session;
-      });
+      Socket.subscribe(
+        "notification/channel",
+        function(err, url, payload) {
+          if (err) return;
+          switch (payload.msg) {
+            case "notification_edited":
+              if (payload.notification.id === this.model.get("id")) {
+                this.model.set(payload.notification);
+              }
+            default:
+          }
+        }.bind(this)
+      );
       this.render();
     },
 
@@ -21,17 +31,9 @@ define([
       click: "onClick"
     },
 
-    onClick: function(a, b, c) {
-      //using "then" promises.
-      this.session.call("notification/add_func", { term1: 2, term2: 5 }).then(
-        function(result) {
-          console.log("RPC Valid!", result);
-        },
-        function(error, desc) {
-          console.log("RPC Error", error, desc);
-        }
-      );
-      debugger;
+    onClick: function(event) {
+      this.model.set("seen", true);
+      this.model.save();
     },
 
     render: function() {

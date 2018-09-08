@@ -964,6 +964,7 @@ services:
         - ./php-websocket/supervisord.d:/etc/supervisord.d
       depends_on:
         - workspace
+        - rabbitmq
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       networks:
