@@ -23,7 +23,11 @@ define([
             "notification/channel",
             function(err, uri, payload) {
               console.log(err, uri, payload);
-              if (err) return;
+              if (err) {
+                console.log("NO WS, Falling back to requests");
+                setInterval(this.notifications.fetch({ reset: true }), 60000);
+                return;
+              }
               switch (payload.msg) {
                 case "notification_created":
                   this.notifications.add(payload.notification);
@@ -40,7 +44,9 @@ define([
     },
 
     renderAdd: function(model, collection, c, d) {
+      console.log("ADD");
       if (!this.filterCheck(model)) return this;
+      if (this.views[model.get("id")]) return this;
       var notificationView = new App.Views.Notification({
         model: model
       });
@@ -69,17 +75,32 @@ define([
       return true;
     },
 
+    views: {},
+
     render: function() {
       console.log("RENDER", this.notifications);
-      this.$el.html("");
       this.notifications.each(
         function(notification) {
-          if (!this.filterCheck(notification)) return;
+          if (!this.filterCheck(notification)) {
+            if (!this.views[notification.get("id")]) return;
+            this.views[notification.get("id")].$el.addClass("animated fadeOut");
+            setTimeout(
+              function() {
+                this.views[notification.get("id")].$el.remove();
+              }.bind(this)
+            );
+            return;
+          }
+
+          if (this.views[notification.get("id")]) return;
 
           var notificationView = new App.Views.Notification({
             model: notification
           });
+          // setTimeout()
           this.$el.append(notificationView.$el);
+          this.$el.addClass("animated fadeIn");
+          this.views[notification.get("id")] = notificationView;
         }.bind(this)
       );
       return this;

@@ -14,7 +14,11 @@ define([
       Socket.subscribe(
         "notification/channel",
         function(err, url, payload) {
-          if (err) return;
+          if (err) {
+            console.log("NO WS, Falling back to requests");
+            setInterval(this.model.fetch, 60000);
+            return;
+          }
           switch (payload.msg) {
             case "notification_edited":
               if (payload.notification.id === this.model.get("id")) {

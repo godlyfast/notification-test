@@ -44,7 +44,9 @@ define([
     },
 
     renderAdd: function(model, collection, c, d) {
+      console.log("ADD");
       if (!this.filterCheck(model)) return this;
+      if (this.views[model.get("id")]) return this;
       var notificationView = new App.Views.Notification({
         model: model
       });
@@ -73,17 +75,32 @@ define([
       return true;
     },
 
+    views: {},
+
     render: function() {
       console.log("RENDER", this.notifications);
-      this.$el.html("");
       this.notifications.each(
         function(notification) {
-          if (!this.filterCheck(notification)) return;
+          if (!this.filterCheck(notification)) {
+            if (!this.views[notification.get("id")]) return;
+            this.views[notification.get("id")].$el.addClass("animated fadeOut");
+            setTimeout(
+              function() {
+                this.views[notification.get("id")].$el.remove();
+              }.bind(this)
+            );
+            return;
+          }
+
+          if (this.views[notification.get("id")]) return;
 
           var notificationView = new App.Views.Notification({
             model: notification
           });
+          // setTimeout()
           this.$el.append(notificationView.$el);
+          this.$el.addClass("animated fadeIn");
+          this.views[notification.get("id")] = notificationView;
         }.bind(this)
       );
       return this;
