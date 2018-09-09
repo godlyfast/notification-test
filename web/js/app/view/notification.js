@@ -11,22 +11,6 @@ define([
     template: Twig.twig({ data: template }),
 
     initialize: function() {
-      Socket.subscribe(
-        "notification/channel",
-        function(err, url, payload) {
-          if (err) {
-            console.log("NO WS, Falling back to no requests");
-            return;
-          }
-          switch (payload.msg) {
-            case "notification_edited":
-              if (payload.notification.id === this.model.get("id")) {
-                this.model.set(payload.notification);
-              }
-            default:
-          }
-        }.bind(this)
-      );
       this.render();
     },
 
