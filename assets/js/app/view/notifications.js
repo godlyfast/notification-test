@@ -70,6 +70,10 @@ define([
     },
 
     filterCheck: function(notification) {
+      if (!notification.get("active")) {
+        return;
+      }
+
       if (
         notification.get("users").find(
           function(user) {
