@@ -69,6 +69,7 @@ class NotificationController extends Controller
             ->andWhere(':now BETWEEN n.validFrom AND n.validTo')
             ->having('COUNT(u) = 0')
             ->groupby('n')
+            ->orderBy('n.id', 'DESC')
             ->setParameter('sid', $this->session->getId())
             ->setParameter('now', new \DateTime())
             ->getQuery()->getResult();
