@@ -233,6 +233,7 @@ services:
         - "${APACHE_HOST_HTTPS_PORT}:443"
       depends_on:
         - php-fpm
+        - php-websocket
       networks:
         - frontend
         - backend
@@ -961,9 +962,7 @@ services:
           - INSTALL_BCMATH=${PHP_WORKER_INSTALL_BCMATH}
       volumes:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
-        - ./php-websocket/supervisord.d:/etc/supervisord.d
       depends_on:
-        - workspace
         - rabbitmq
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
