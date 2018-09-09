@@ -15,7 +15,7 @@ define(["jquery", "underscore", "backbone"], function($, _, Backbone) {
 
   var getSession = function(cb) {
     if (!window.WS) return cb(new Error("No WS"));
-    if (Session) return cb(Session);
+    if (Session) return cb(null, Session);
     var webSocket = WS.connect("ws://" + window.location.hostname + ":9090");
 
     webSocket.on("socket/connect", function(session) {
