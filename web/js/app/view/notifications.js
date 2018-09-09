@@ -36,9 +36,11 @@ define([
               switch (payload.msg) {
                 case "notification_created":
                   this.notifications.add(payload.notification);
+                  break;
                 case "notification_edited":
                   const n = this.notifications.get(payload.notification.id);
                   n.set(payload.notification);
+                  break;
                 default:
                   break;
               }
