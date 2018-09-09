@@ -35,7 +35,7 @@ class UserController extends Controller
           $user = new User();
         }
 
-        $user->getSessionId($this->session->getId());
+        $user->setSessionId($this->session->getId());
         $user->setToken($content['token']);
 
         $encoders = array(new JsonEncoder());
