@@ -16,7 +16,7 @@ define(["jquery", "underscore", "backbone", "app/model/notification"], function(
     },
 
     comparator: function(a, b) {
-      return +a.get("id") - +b.get("id") > 0 ? -1 : 1;
+      return +a.get("id") > +b.get("id") ? 1 : -1;
     },
 
     initialize: function(options) {
