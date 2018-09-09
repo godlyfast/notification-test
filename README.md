@@ -22,6 +22,8 @@ The front-end Backbone view should poll the server every minute and dynamically 
 
 The solution uses webSocket connection to maintain notifications in up-to-date state and also uses RabbitMQ for for pushing messages from the server to all clients when any notification state was changed. In this way user will see immediate view update when any change was applied to any notification, and this update will be populated to all user's devices connected to a server via socket with near-zero delay.
 
+[Demo App Link](http://ec2-18-234-172-109.compute-1.amazonaws.com)
+
 ### The libs used here:
 
 - [Docker](https://www.docker.com/)
