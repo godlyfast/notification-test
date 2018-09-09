@@ -1,7 +1,7 @@
 define(["jquery", "underscore", "backbone"], function($, _, Backbone) {
   "use strict";
 
-  var User;
+  var User, Session;
 
   var rand = function() {
     return Math.random()
@@ -15,9 +15,11 @@ define(["jquery", "underscore", "backbone"], function($, _, Backbone) {
 
   var getSession = function(cb) {
     if (!window.WS) return cb(new Error("No WS"));
+    if (Session) return cb(Session);
     var webSocket = WS.connect("ws://" + window.location.hostname + ":9090");
 
     webSocket.on("socket/connect", function(session) {
+      Session = session;
       cb(null, session);
     });
 
