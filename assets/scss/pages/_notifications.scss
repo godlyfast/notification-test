@@ -1,0 +1,19 @@
+.notification-container{
+  border: 1px solid black;
+  max-height: 1000px;
+  overflow: hidden;
+  transition: 0.5s transform, .5s background-color, 500ms max-height ;
+
+  &:hover{
+    cursor: pointer;
+    background-color: #f2f2f2;
+    transform: scale(1.05);
+  }
+
+  border-radius: 50px;
+  text-align: center;
+  margin: 10px;
+  .notification-title {
+    border-bottom: 1px solid black;
+  }
+}

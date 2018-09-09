@@ -15,8 +15,7 @@ define([
         "notification/channel",
         function(err, url, payload) {
           if (err) {
-            console.log("NO WS, Falling back to requests");
-            setInterval(this.model.fetch, 60000);
+            console.log("NO WS, Falling back to no requests");
             return;
           }
           switch (payload.msg) {

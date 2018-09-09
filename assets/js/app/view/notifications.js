@@ -25,7 +25,12 @@ define([
               console.log(err, uri, payload);
               if (err) {
                 console.log("NO WS, Falling back to requests");
-                setInterval(this.notifications.fetch({ reset: true }), 60000);
+                setInterval(
+                  function() {
+                    this.notifications.fetch();
+                  }.bind(this),
+                  5000
+                );
                 return;
               }
               switch (payload.msg) {
@@ -39,10 +44,6 @@ define([
       );
     },
 
-    events: {
-      // change: "render"
-    },
-
     renderAdd: function(model, collection, c, d) {
       console.log("ADD");
       if (!this.filterCheck(model)) return this;
@@ -50,7 +51,21 @@ define([
       var notificationView = new App.Views.Notification({
         model: model
       });
+      notificationView.$el
+        .find(".notification-container")
+        .css({ "max-height": "0px", opacity: 0 });
       this.$el.prepend(notificationView.$el);
+      setTimeout(
+        function() {
+          notificationView.$el
+            .find(".notification-container")
+            .css({ "max-height": "1000px", opacity: 1 });
+          notificationView.$el.addClass("animated fadeIn");
+        }.bind(this),
+        100
+      );
+
+      this.views[model.get("id")] = notificationView;
       return this;
     },
 
@@ -84,23 +99,21 @@ define([
           if (!this.filterCheck(notification)) {
             if (!this.views[notification.get("id")]) return;
             this.views[notification.get("id")].$el.addClass("animated fadeOut");
+            this.views[notification.get("id")].$el
+              .find(".notification-container")
+              .css("max-height", "0px");
             setTimeout(
               function() {
                 this.views[notification.get("id")].$el.remove();
-              }.bind(this)
+              }.bind(this),
+              1000
             );
             return;
           }
 
           if (this.views[notification.get("id")]) return;
 
-          var notificationView = new App.Views.Notification({
-            model: notification
-          });
-          // setTimeout()
-          this.$el.append(notificationView.$el);
-          this.$el.addClass("animated fadeIn");
-          this.views[notification.get("id")] = notificationView;
+          this.renderAdd(notification);
         }.bind(this)
       );
       return this;

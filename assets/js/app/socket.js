@@ -22,6 +22,7 @@ define(["jquery", "underscore", "backbone"], function($, _, Backbone) {
     });
 
     webSocket.on("socket/disconnect", function(error) {
+      cb(new Error(error.reason));
       console.log(
         "Disconnected for " + error.reason + " with code " + error.code
       );

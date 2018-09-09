@@ -224,4 +224,19 @@ textarea {
 #notification-list tr:first-child th {
   border-bottom: 1px solid #000; }
 
+.notification-container {
+  border: 1px solid black;
+  max-height: 1000px;
+  overflow: hidden;
+  transition: 0.5s transform, 0.5s background-color, 500ms max-height;
+  border-radius: 50px;
+  text-align: center;
+  margin: 10px; }
+  .notification-container:hover {
+    cursor: pointer;
+    background-color: #f2f2f2;
+    transform: scale(1.05); }
+  .notification-container .notification-title {
+    border-bottom: 1px solid black; }
+
 /*# sourceMappingURL=main.css.map */

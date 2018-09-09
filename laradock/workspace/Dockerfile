@@ -794,13 +794,23 @@ RUN if [ ${INSTALL_PG_CLIENT} = true ]; then \
 ;fi
 
 ###########################################################################
+# RUBY SASS
+###########################################################################
+
+USER root
+
+RUN apt-get install -y ruby-full rubygems-integration
+RUN gem install sass -v 3.2.19
+RUN gem install compass
+
+###########################################################################
 # nasm
 ###########################################################################
 
 USER root
 
 RUN apt-get update -yqq \
-    && apt-get -yqq install nasm 
+    && apt-get -yqq install nasm
 
 ###########################################################################
 # Dusk Dependencies:
