@@ -72,6 +72,18 @@ define([
       );
 
       this.views[model.get("id")] = notificationView;
+
+      Socket.call(
+        "notification/make_seen",
+        { notificationId: model.get("id"), sessionId: this.User.sessionId },
+        function(err, data) {
+          console.log(
+            err,
+            "Made Seen Notification with id " + model.get("id") + " via sockets"
+          );
+        }.bind(this)
+      );
+
       return this;
     },
 

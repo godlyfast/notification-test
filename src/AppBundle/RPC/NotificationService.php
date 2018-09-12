@@ -31,15 +31,28 @@ class NotificationService implements RpcInterface
     public function addFunc(ConnectionInterface $connection, WampRequest $request, $params)
     {
         return array(
-          "result" => array_sum($params),
-          "con" => json_encode($connection)
+          "result" => array_sum($params)
         );
     }
 
     public function makeSeen(ConnectionInterface $connection, WampRequest $request, $params)
     {
-        $e = $this->em->getRepository('AppBundle:Notification')->findAll();
-        return ['e' => $e];
+        $notification = $this
+            ->em->getRepository('AppBundle:Notification')
+            ->find($params['notificationId']);
+        $user = $this
+            ->em->getRepository('AppBundle:User')
+            ->findOneBy(['sessionId' => $params['sessionId']]);
+        if (!isset($user)) {
+          $user = new \AppBunle\Entity\User();
+          $user->setSessionId($params['sessionId']);
+        }
+        $notification->users[] = $user;
+
+        $this->em->persist($notification);
+        $this->em->flush($notification);
+
+        return ['result' => 'success'];
     }
 
     /**
